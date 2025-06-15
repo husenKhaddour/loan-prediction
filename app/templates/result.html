@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card shadow p-4">
+    <h2 class="card-title text-success mb-3">Prediction Result</h2>
+    <p class="card-text lead">{{ result|safe }}</p>
+    <a href="/requests" class="btn btn-outline-secondary mt-3">Back to Requests</a>
+</div>
+{% endblock %}

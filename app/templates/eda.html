@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+     th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+    }
+
+    thead tr {
+      background-color: #f2f2f2;
+    }
+</style>
+<div class="eda-container" style="max-width: 1000px; margin: auto; font-family: Arial, sans-serif; line-height: 1.6; direction: rtl; text-align: right;">
+
+  <h1>تحليل البيانات الاستكشافي | Exploratory Data Analysis</h1>
+
+  <section>
+    <h2>مقدمة</h2>
+    <p>
+      نهدف في هذه الوظيفة إلى تحليل مجموعة البيانات المقدمة وبناء نموذج لمساعدة البنك في قبول أو رفض الطلبات المقدمة.
+      تحتوي البيانات على سمات متعددة مثل العمر، الدخل، عدد أفراد العائلة، مقدار القرض، وغيرها.
+      هذه السمات تُستخدم لتدريب نموذج تصنيفي يتخذ القرار المناسب بناءً على خصائص كل طلب.
+    </p>
+    <p>
+      تم تنفيذ التحليل باستخدام <code>Google Colab</code>، وتم استخدام Git وGitHub للتعاون ومشاركة الكود.
+      <br>
+      رابط الموقع: <a href="https://husenkh.pythonanywhere.com" target="_blank">husenkh.pythonanywhere.com</a><br>
+      رابط المستودع: <a href="https://github.com/husenKhaddour/loan-prediction" target="_blank">GitHub - loan-prediction</a>
+    </p>
+  </section>
+
+  <section>
+    <h2>1. تحميل ومعاينة البيانات</h2>
+    <p>تم تحميل مجموعة البيانات <code>loan_prediction.csv</code> والتي تحتوي على {{ rows }} سجل و{{ cols }} عمود.</p>
+    <p>
+      تمت إزالة الأعمدة غير المفيدة مثل <code>LoanID</code> و <code>#</code>. كما تم التعامل مع القيم الفارغة عبر استبدالها بالقيم المناسبة:
+      <ul>
+        <li>القيم العددية: تم استبدالها بالمتوسط (Mean)</li>
+        <li>القيم الفئوية: تم استبدالها بالقيمة الأكثر تكراراً (Mode)</li>
+      </ul>
+    </p>
+  </section>
+
+  <section>
+    <h2>2. وصف الحقول وتحليل القيم</h2>
+    <p>الجدول التالي يوضح ملخص الحقول وتحليلها:</p>
+    <pre style="background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto;">
+<table style="width: 100%; border-collapse: collapse; direction: rtl; text-align: right; font-family: Arial, sans-serif;">
+  <thead>
+    <tr style="background-color: #f2f2f2;">
+      <th style="border: 1px solid #ccc; padding: 8px;">العمود</th>
+      <th style="border: 1px solid #ccc; padding: 8px;">الوصف</th>
+      <th style="border: 1px solid #ccc; padding: 8px;">مجال القيم</th>
+      <th style="border: 1px solid #ccc; padding: 8px;">توزع القيم</th>
+      <th style="border: 1px solid #ccc; padding: 8px;">القيم الفارغة</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="border: 1px solid #ccc; padding: 8px;">Loan ID</td>
+      <td style="border: 1px solid #ccc; padding: 8px;">معرف القرض</td>
+      <td style="border: 1px solid #ccc; padding: 8px;">#</td>
+      <td style="border: 1px solid #ccc; padding: 8px;">#</td>
+      <td style="border: 1px solid #ccc; padding: 8px;">0</td>
+    </tr>
+    <tr>
+      <td>Gender</td>
+      <td>جنس المتقدم</td>
+      <td>{Male , Female}</td>
+      <td>18% F , 82% M</td>
+      <td>13</td>
+    </tr>
+    <tr>
+      <td>Dependents</td>
+      <td>عدد أفراد عائلة المتقدم</td>
+      <td>{0,1,2,+3}</td>
+      <td>[57%, 17%, 17%, 8%]</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <td>Education</td>
+      <td>مؤهلات المتقدم</td>
+      <td>{Graduated, Un Graduated}</td>
+      <td>[78%, 22%]</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Property Area</td>
+      <td>منطقة العقار</td>
+      <td>{Semi Urban, Urban, Rural}</td>
+      <td>[39%, 31%, 30%]</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Self Employed</td>
+      <td>هل المتقدم موظف</td>
+      <td>{No, Yes}</td>
+      <td>[81%, 19%]</td>
+      <td>32</td>
+    </tr>
+    <tr>
+      <td>Married</td>
+      <td>الوضع العائلي للمتقدم (متزوج أم لا)</td>
+      <td>{Yes , No}</td>
+      <td>[65%, 35%]</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <td>Loan Status</td>
+      <td>حالة القرض (مقبول أم مرفوض)</td>
+      <td>{eligible , not eligible}</td>
+      <td>[68%, 32%]</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Credit History</td>
+      <td>تاريخ الائتمان (هل تقدم بطلبات قبل)</td>
+      <td>{Yes, No}</td>
+      <td>[73%, 27%]</td>
+      <td>50</td>
+    </tr>
+    <tr>
+      <td>Applicant Income</td>
+      <td>دخل المتقدم</td>
+      <td>[0, 72000]</td>
+      <td>المتوسط: 4805، الانحراف: 4910</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Loan Amount</td>
+      <td>مقدار القرض</td>
+      <td>[108, 550]</td>
+      <td>المتوسط: 136، الانحراف: 61</td>
+      <td>14</td>
+    </tr>
+    <tr>
+      <td>Co app. Income</td>
+      <td>دخل الكفيل</td>
+      <td>[0, 24000]</td>
+      <td>المتوسط: 1569، الانحراف: 2334</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>Loan Amount Term</td>
+      <td>مدة القرض</td>
+      <td>[6, 480]</td>
+      <td>المتوسط: 34، الانحراف: 65</td>
+      <td>22</td>
+    </tr>
+  </tbody>
+</table>
+
+    </pre>
+  </section>
+
+  <section>
+    <h2>3. تحليل القيم العددية</h2>
+    <p>
+      تم تحليل القيم العددية مثل الدخل، القرض، مدة القرض، ودخل الكفيل. نلاحظ ما يلي:
+      <ul>
+        <li>مقدار القرض يتبع توزيعاً طبيعياً.</li>
+        <li>دخل المتقدم والكفيل منحاز لليسار (توزيع غير طبيعي).</li>
+        <li>مدة القرض تم التعامل معها لاحقاً كقيمة فئوية.</li>
+      </ul>
+    </p>
+    <img src="{{ url_for('static', filename='assets/dist3.png') }}" alt="توزيع القيم العددية" style="width: 100%; max-width: 600px;"/>
+
+    <h3>مصفوفة الترابط</h3>
+    <p>
+      نلاحظ وجود ترابط واضح بين دخل المتقدم ومقدار القرض، مما يدل على اعتماد البنك على دخل المتقدم في تحديد مقدار القرض.
+      <br>بينما لا يوجد ترابط بين دخل المتقدم ودخل الكفيل.
+    </p>
+    <img src="{{ url_for('static', filename='assets/conf.png') }}" alt="Correlation Heatmap" style="width: 100%; max-width: 600px;"/>
+
+    <h3>المخططات الصندوقية (Boxplots)</h3>
+    <p>توضح القيم الشاذة Outliers في الدخل ومقدار القرض:</p>
+    <img src="{{ url_for('static', filename='assets/dist.png') }}" alt="Boxplots" style="width: 100%; max-width: 600px;"/>
+  </section>
+
+  <section>
+    <h2>4. تحليل القيم الفئوية</h2>
+    <p>
+      تُظهر الرسوم البيانية أن معظم المتقدمين من الذكور، وأن الأغلبية من المتزوجين والجامعيين، ومعظم الطلبات المقبولة تعود لأشخاص لديهم تاريخ ائتماني.
+    </p>
+    <img src="{{ url_for('static', filename='assets/cat.png') }}" alt="توزيع القيم الفئوية" style="width: 100%; max-width: 600px;"/>
+    <p>توزيع الفئات مع النتيجة:</p>
+    <img src="{{ url_for('static', filename='assets/download.png') }}" alt="Categorical with Target" style="width: 100%; max-width: 600px;"/>
+  </section>
+
+  <section>
+    <h2>تنظيم الحقول وترميزها</h2>
+    <p>
+      تم استخدام <code>LabelEncoder</code> لترميز الحقول الفئوية وتحويل النصوص إلى أرقام. <br>
+      كما تم استخدام <code>StandardScaler</code> لتحجيم القيم العددية لتكون مناسبة للنماذج التي تتأثر بمجال القيم.
+    </p>
+  </section>
+
+  <section>
+    <h2>6. بناء النماذج وتقييمها</h2>
+
+    <h3>Decision Tree</h3>
+    <p>المعاملات الأفضل:</p>
+    <pre>
+max_depth: 13
+min_samples_split: 45
+min_samples_leaf: 30
+criterion: entropy
+    </pre>
+    <p>الدقة : 83%</p>
+    <img src="{{ url_for('static', filename='assets/svm1.PNG') }}" alt="DT Confusion Matrix" style="width: 100%; max-width: 400px;"/>
+
+    <h3>Support Vector Machine (SVM)</h3>
+    <p>المعاملات: C=11, kernel=linear</p>
+    <p>الدقة: 83%</p>
+    <img src="{{ url_for('static', filename='assets/svm1.PNG') }}" alt="SVM Confusion Matrix" style="width: 100%; max-width: 400px;"/>
+
+    <h3>K-Nearest Neighbors (KNN)</h3>
+    <p>المعاملات: n_neighbors=19, metric=manhattan, weights=distance</p>
+    <p>الدقة 78%</p>
+    <img src="{{ url_for('static', filename='assets/knn1.PNG') }}" alt="KNN Confusion Matrix" style="width: 100%; max-width: 400px;"/>
+  </section>
+
+  <section>
+    <h2>7. حفظ النماذج والبيانات</h2>
+    <p>
+      تم حفظ البيانات المعالجة والنماذج المدربة (Decision Tree, SVM, KNN) بالإضافة إلى أدوات الترميز والتحجيم لاستخدامها لاحقاً في التنبؤ.
+    </p>
+  </section>
+
+</div>
+
+{% endblock %}
