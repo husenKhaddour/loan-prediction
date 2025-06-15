@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Prediction History{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Prediction Requests History</h2>
+    {% if history and history|length > 0 %}
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Timestamp (UTC)</th>
+                <th>Input Data</th>
+                <th>Prediction</th>
+                <th>Probability</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in history %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ entry.timestamp }}</td>
+                <td>
+                    <ul class="mb-0">
+                        {% for key, value in entry.input.items() %}
+                        <li><strong>{{ key }}:</strong> {{ value }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td>{{ entry.prediction }}</td>
+                <td>{{ '%.2f'|format(entry.probability) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No prediction history available.</p>
+    {% endif %}
+    <a href="{{ url_for('main.home') }}" class="btn btn-primary mt-3">Back to Home</a>
+</div>
+{% endblock %}
